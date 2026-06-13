@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sL \"https://www.dnd5eapi.co/api/2014/spells\")",
+      "Bash(python -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('count:',d['count']\\);print\\('first result:',d['results'][0]\\)\")",
+      "Bash(curl -sL \"https://www.dnd5eapi.co/api/2014/spells/acid-arrow\")",
+      "Bash(python -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('name:',d['name']\\);print\\('level:',d['level']\\);print\\('school:',d['school']['name']\\);print\\('casting_time:',d.get\\('casting_time'\\)\\);print\\('range:',d.get\\('range'\\)\\);print\\('duration:',d.get\\('duration'\\)\\);print\\('desc0:',d['desc'][0][:80]\\)\")",
+      "Bash(curl -sL \"https://www.dnd5eapi.co/api/2014/magic-items/adamantine-armor\")",
+      "Bash(python -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('name:',d['name']\\);print\\('rarity:',d.get\\('rarity'\\)\\);print\\('desc0:',d['desc'][0][:80]\\)\")",
+      "Bash(curl -sI \"https://www.dnd5eapi.co/api/2014/spells\")",
+      "Bash(awk '/^<script>/{f=1;next} /^<\\\\/script>/{f=0} f' index.html)",
+      "Bash(node --check /tmp/dd.js)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

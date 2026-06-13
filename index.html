@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dice & Oracle — a GM's companion</title>
-<meta name="description" content="A tabletop dice roller and oracle: full polyhedral set, advantage rolls, a yes/no oracle, and random tables.">
+<title>Dungeon Dice — a GM's companion</title>
+<meta name="description" content="A tabletop GM toolkit: dice-notation roller, a yes/no oracle, worldbuilding generators, a grimoire of spells, and custom random tables.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -31,6 +31,7 @@
   @media(max-width:760px){.grid{grid-template-columns:1fr}}
   .card{background:linear-gradient(180deg,var(--panel),#100d0c);border:1px solid var(--line);
     padding:1.4rem;box-shadow:0 1px 0 rgba(202,191,168,.04) inset, 0 10px 40px rgba(0,0,0,.5)}
+  .card+.card,.grid+.card,.card+.grid{margin-top:1.25rem}
   .card h2{font-family:'Cinzel',serif;font-size:1.15rem;font-weight:700;margin-bottom:1.1rem;color:var(--bone);
     display:flex;align-items:center;gap:.6rem;letter-spacing:.02em}
   .card h2::before{content:'';width:7px;height:7px;background:var(--blood);transform:rotate(45deg);
@@ -51,14 +52,35 @@
     padding:.45rem .55rem;cursor:pointer;border:1px solid var(--line);background:#0a0807;color:var(--dim)}
   .adv button.on{border-color:var(--blood);color:var(--blood)}
 
-  .result{text-align:center;padding:1.4rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:1rem}
+  /* free-text dice notation */
+  .cast-row{display:flex;gap:.5rem;margin-bottom:1rem}
+  .cast-row input{flex:1;font-family:var(--mono);font-size:.82rem;background:#0a0807;border:1px solid var(--line);
+    color:var(--bone);padding:.55rem .6rem}
+  .cast-row input:focus{outline:none;border-color:var(--blood)}
+  .cast-row input::placeholder{color:var(--dim)}
+  .cast-row button{font-family:'Cinzel',serif;font-weight:700;font-size:.8rem;letter-spacing:.05em;padding:.4rem 1rem;
+    cursor:pointer;border:1px solid var(--blood);color:var(--bone);background:linear-gradient(180deg,rgba(138,28,28,.22),rgba(138,28,28,.06));transition:all .2s}
+  .cast-row button:hover{box-shadow:0 0 18px rgba(168,35,35,.3)}
+
+  .result{position:relative;text-align:center;padding:1.4rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:1rem;overflow:hidden}
   .result .total{font-family:'Cinzel',serif;font-size:3.6rem;font-weight:900;line-height:1;color:var(--bone);
     text-shadow:0 0 26px rgba(154,123,53,.4)}
+  .result .total.rolling{color:var(--dim);opacity:.7}
+  .result .total.settle{animation:settle .42s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes settle{0%{transform:scale(1.35);opacity:.4}60%{transform:scale(.94)}100%{transform:scale(1);opacity:1}}
   .result .total.crit{color:var(--gold);text-shadow:0 0 30px rgba(154,123,53,.7)}
   .result .total.fail{color:var(--blood);text-shadow:0 0 30px rgba(168,35,35,.7)}
   .result .break{font-family:var(--mono);font-size:.74rem;color:var(--dim);margin-top:.7rem;word-break:break-word}
+  .result .break .drop{color:#4a4036;text-decoration:line-through}
+  .result .break.err{color:var(--blood)}
   .result .crit-tag{color:var(--gold);font-weight:700;letter-spacing:.12em}
   .result .fail-tag{color:var(--blood);font-weight:700;letter-spacing:.12em}
+  /* purely-visual crit/fumble motes */
+  .mote{position:absolute;bottom:0;width:4px;height:4px;border-radius:50%;pointer-events:none}
+  .mote.ember{background:var(--gold);box-shadow:0 0 8px var(--gold);animation:rise var(--life) ease-out forwards}
+  .mote.ash{background:#8a8170;animation:fall var(--life) linear forwards;top:0;bottom:auto}
+  @keyframes rise{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-110px) scale(.2);opacity:0}}
+  @keyframes fall{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(110px);opacity:0}}
 
   .quick{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
   .quick button{font-family:var(--mono);font-size:.66rem;padding:.4rem .6rem;cursor:pointer;
@@ -74,27 +96,96 @@
     background:linear-gradient(180deg,rgba(138,28,28,.22),rgba(138,28,28,.06))}
   .oracle-btn:hover{background:linear-gradient(180deg,rgba(168,35,35,.4),rgba(138,28,28,.15));
     box-shadow:0 0 26px rgba(168,35,35,.3)}
+  .oracle-btn.asking{animation:pulse .9s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 8px rgba(168,35,35,.2)}50%{box-shadow:0 0 30px rgba(168,35,35,.55)}}
   .odds{width:100%;font-family:var(--mono);font-size:.74rem;background:#0a0807;border:1px solid var(--line);color:var(--ink);padding:.55rem;margin-bottom:1rem}
   .answer{text-align:center;font-family:'Cinzel',serif;font-size:1.65rem;font-weight:700;min-height:2rem;margin-bottom:.4rem;color:var(--bone)}
+  .answer.reveal{animation:reveal .5s ease-out}
+  @keyframes reveal{0%{opacity:0;letter-spacing:.4em;filter:blur(6px)}100%{opacity:1;letter-spacing:normal;filter:none}}
   .answer.yes{color:var(--gold)}.answer.no{color:var(--blood)}.answer.maybe{color:var(--ember)}
-  .answer-sub{text-align:center;font-family:var(--mono);font-size:.7rem;color:var(--dim);margin-bottom:1.25rem;min-height:1rem;font-style:italic}
-  .answer-sub{font-style:normal}
+  .answer-sub{text-align:center;font-family:var(--mono);font-size:.7rem;color:var(--dim);margin-bottom:1.25rem;min-height:1rem}
+
+  /* Loreweaver (worldbuilding generators) */
+  .gen{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+  .gen button{font-family:var(--mono);font-size:.68rem;padding:.5rem .8rem;cursor:pointer;letter-spacing:.04em;
+    border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:all .15s}
+  .gen button:hover{border-color:var(--arc);color:var(--bone);box-shadow:0 0 16px rgba(90,74,110,.35)}
+  .lore{min-height:3rem;display:grid;gap:.45rem}
+  .lore .lore-title{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--arc);margin-bottom:.2rem}
+  .lore-item{line-height:1.5;color:var(--bone);font-style:italic}
+  .lore-item .lbl{font-family:var(--mono);font-style:normal;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:.05rem}
+  .lore.empty{color:var(--dim);font-style:italic;align-content:center}
 
   .tables{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem}
   .tables button{font-family:var(--mono);font-size:.66rem;padding:.45rem .6rem;cursor:pointer;
-    border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:all .15s}
+    border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:all .15s;position:relative}
   .tables button:hover{border-color:var(--gold);color:var(--gold)}
+  .tables button.custom{border-style:dashed}
+  .tables button .kill{margin-left:.45rem;color:var(--dim);font-style:normal}
+  .tables button .kill:hover{color:var(--blood)}
   .draw{min-height:2.4rem;font-size:1.02rem;line-height:1.65;color:var(--bone);font-style:italic;
     border-left:2px solid var(--blood);padding:.5rem 0 .5rem .9rem}
   .draw .src{display:block;font-family:var(--mono);font-style:normal;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:.35rem}
+
+  .forge-toggle{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+    background:none;border:none;cursor:pointer;margin-top:.9rem;padding:0}
+  .forge-toggle:hover{color:var(--gold)}
+  .forge{display:none;flex-direction:column;gap:.5rem;margin-top:.7rem}
+  .forge.open{display:flex}
+  .forge input,.forge textarea{font-family:var(--mono);font-size:.74rem;background:#0a0807;border:1px solid var(--line);
+    color:var(--bone);padding:.5rem}
+  .forge input:focus,.forge textarea:focus{outline:none;border-color:var(--gold)}
+  .forge textarea{min-height:74px;resize:vertical;line-height:1.5}
+  .forge .forge-go{font-family:'Cinzel',serif;font-weight:700;font-size:.78rem;letter-spacing:.04em;padding:.5rem;cursor:pointer;
+    border:1px solid var(--gold);color:var(--bone);background:linear-gradient(180deg,rgba(154,123,53,.2),rgba(154,123,53,.04));transition:all .2s}
+  .forge .forge-go:hover{box-shadow:0 0 16px rgba(154,123,53,.3)}
+
   footer{text-align:center;margin-top:1.9rem;color:var(--dim);font-family:var(--mono);font-size:.68rem}
   footer a{color:var(--blood);text-decoration:none}
+
+  /* ── D&D-esque ornament + arcane refinements ── */
+  .d20mark{display:block;width:44px;margin:0 auto .7rem;color:var(--gold);opacity:.55;filter:drop-shadow(0 0 10px rgba(154,123,53,.35))}
+  .card{position:relative}
+  .card::before{content:'';position:absolute;top:0;left:1.1rem;right:1.1rem;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(154,123,53,.35),transparent)}
+  .card.arcane::before{background:linear-gradient(90deg,transparent,rgba(90,74,110,.55),transparent)}
+  .card.arcane h2::before{background:var(--arc);box-shadow:0 0 12px rgba(90,74,110,.8)}
+  /* faint spinning d20 behind the dice total */
+  .result .glyph{position:absolute;top:50%;left:50%;width:120px;height:120px;transform:translate(-50%,-50%);
+    color:var(--bone);opacity:.05;pointer-events:none;animation:spin 26s linear infinite}
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+  /* ── Grimoire (magic) ── */
+  .well-toggle{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--dim);cursor:pointer;margin-bottom:.9rem;user-select:none}
+  .well-toggle input{accent-color:var(--arc);cursor:pointer}
+  .well-toggle .net{margin-left:auto;font-size:.56rem;letter-spacing:.1em}
+  .well-toggle .net.on{color:var(--arc)} .well-toggle .net.off{color:var(--dim)}
+  .spellbtns{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+  .spellbtns button{font-family:var(--mono);font-size:.68rem;padding:.5rem .8rem;cursor:pointer;letter-spacing:.04em;
+    border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:all .15s}
+  .spellbtns button:hover{border-color:var(--arc);color:var(--bone);box-shadow:0 0 16px rgba(90,74,110,.35)}
+  .spellbtns button.surge:hover{border-color:var(--ember);color:var(--ember);box-shadow:0 0 16px rgba(192,86,31,.3)}
+  .grim{min-height:3rem;display:grid;gap:.45rem}
+  .grim.empty{color:var(--dim);font-style:italic;align-content:center}
+  .grim.loading{color:var(--arc);font-style:italic;animation:pulse 1s ease-in-out infinite}
+  .grim .grim-name{font-family:'Cinzel',serif;font-size:1.15rem;color:var(--bone);line-height:1.2}
+  .grim .grim-meta{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--arc)}
+  .grim .grim-body{line-height:1.55;color:var(--ink);font-style:italic}
+  .grim .grim-cost{font-family:var(--mono);font-size:.66rem;color:var(--ember);border-left:2px solid var(--ember);padding-left:.6rem}
+  .grim .grim-src{font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <p class="eyebrow">Bones &amp; the Black Oracle</p>
+    <svg class="d20mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M32 3 59 18.5 59 45.5 32 61 5 45.5 5 18.5Z"/>
+      <path d="M32 19 44 27 44 37 32 45 20 37 20 27Z"/>
+      <path d="M32 3 32 19 M59 18.5 44 27 M59 45.5 44 37 M32 61 32 45 M5 45.5 20 37 M5 18.5 20 27"/>
+      <path d="M32 19 32 45 M44 27 20 37 M44 37 20 27"/>
+    </svg>
+    <p class="eyebrow">Dungeon Dice</p>
     <h1>Cast the Bones, Heed the Dark</h1>
   </header>
 
@@ -102,6 +193,11 @@
     <!-- DICE -->
     <section class="card">
       <h2>The Bone Tray</h2>
+      <div class="cast-row">
+        <input type="text" id="notation" autocomplete="off" spellcheck="false"
+          placeholder="2d6+3 · 4d6dl1 · 1d20kh2 · 1d6!" aria-label="dice notation">
+        <button id="cast">Cast</button>
+      </div>
       <div class="dice-row" id="diceRow"></div>
       <div class="opts">
         <div class="opt"><label>Quantity</label><input type="number" id="qty" min="1" max="100" value="1"></div>
@@ -115,6 +211,11 @@
         </div>
       </div>
       <div class="result">
+        <svg class="glyph" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+          <path d="M32 3 59 18.5 59 45.5 32 61 5 45.5 5 18.5Z"/>
+          <path d="M32 19 44 27 44 37 32 45 20 37 20 27Z"/>
+          <path d="M32 3 32 19 M59 18.5 44 27 M59 45.5 44 37 M32 61 32 45 M5 45.5 20 37 M5 18.5 20 27"/>
+        </svg>
         <div class="total" id="total">—</div>
         <div class="break" id="break">cast a bone, or call a swift fate below</div>
       </div>
@@ -147,6 +248,37 @@
       <h2 style="margin-top:.5rem">Omens &amp; Auguries</h2>
       <div class="tables" id="tables"></div>
       <div class="draw" id="draw"><span class="src">the lots lie still</span>Choose an augury above.</div>
+      <button class="forge-toggle" id="forgeToggle">＋ forge your own table</button>
+      <div class="forge" id="forge">
+        <input type="text" id="forgeName" placeholder="table name — e.g. Weather" autocomplete="off">
+        <textarea id="forgeItems" placeholder="one entry per line…"></textarea>
+        <button class="forge-go" id="forgeGo">Forge table</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <!-- LOREWEAVER -->
+    <section class="card">
+      <h2>The Loreweaver</h2>
+      <div class="gen" id="gen"></div>
+      <div class="lore empty" id="lore">Summon an NPC, a haunt, a town, a faction, a dungeon, or a stretch of wilderness — a seed to grow at the table.</div>
+    </section>
+
+    <!-- GRIMOIRE -->
+    <section class="card arcane">
+      <h2>The Grimoire</h2>
+      <label class="well-toggle">
+        <input type="checkbox" id="wellToggle">
+        Draw from the deeper well
+        <span class="net off" id="netState">live SRD · off</span>
+      </label>
+      <div class="spellbtns">
+        <button id="spellBtn">Turn a page</button>
+        <button id="relicBtn">Pull a relic</button>
+        <button id="surgeBtn" class="surge">Wild magic surges!</button>
+      </div>
+      <div class="grim empty" id="grim">A spell, a relic, or a surge of raw chaos — turn a page and see what answers.</div>
     </section>
   </div>
 
@@ -154,97 +286,452 @@
 </div>
 
 <script>
+"use strict";
 const $=id=>document.getElementById(id);
 const rnd=n=>Math.floor(Math.random()*n)+1;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-const DICE=[4,6,8,10,12,20,100];
+
+/* ════════════════════════════════════════════════════════════════
+   DICE ENGINE  — a small dice-notation parser
+   supports: NdX, kh#/kl#/dh#/dl#, exploding "!", multi-term +/- math
+   ════════════════════════════════════════════════════════════════ */
+function rollExpr(expr){
+  const clean=String(expr).toLowerCase().replace(/\s+/g,'');
+  if(!clean) throw new Error('cast something');
+  const parts=clean.match(/[+-]?[^+-]+/g);
+  if(!parts) throw new Error('unreadable');
+  let total=0; const segs=[];
+  for(let raw of parts){
+    let sign=1, p=raw;
+    if(p[0]==='+'){p=p.slice(1);} else if(p[0]==='-'){sign=-1;p=p.slice(1);}
+    const dm=p.match(/^(\d*)d(\d+)(.*)$/);
+    if(dm){
+      const n=Math.min(100,Math.max(1,parseInt(dm[1]||'1',10)));
+      const sides=parseInt(dm[2],10);
+      if(sides<2) throw new Error('a die needs ≥2 sides');
+      const mods=dm[3];
+      const exploding=mods.includes('!');
+      let faces=[];
+      for(let i=0;i<n;i++){
+        let r=rnd(sides); faces.push(r);
+        if(exploding){ let guard=0; while(r===sides && guard++<99){ r=rnd(sides); faces.push(r); } }
+      }
+      let kept=faces.slice(), dropped=[];
+      const km=mods.match(/(kh|kl|dh|dl)(\d+)/);
+      if(km){
+        const kind=km[1], k=Math.min(parseInt(km[2],10),faces.length);
+        const order=faces.map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v);
+        let keepSet;
+        if(kind==='kh') keepSet=order.slice(order.length-k);
+        else if(kind==='kl') keepSet=order.slice(0,k);
+        else if(kind==='dl') keepSet=order.slice(k);
+        else keepSet=order.slice(0,order.length-k); // dh
+        const keepIdx=new Set(keepSet.map(o=>o.i));
+        kept=faces.filter((_,i)=>keepIdx.has(i));
+        dropped=faces.filter((_,i)=>!keepIdx.has(i));
+      }
+      total+=kept.reduce((a,b)=>a+b,0)*sign;
+      segs.push({type:'dice',sign,n,sides,faces,kept,dropped,exploding});
+    } else if(/^\d+$/.test(p)){
+      const v=parseInt(p,10); total+=v*sign;
+      segs.push({type:'const',sign,value:v});
+    } else {
+      throw new Error('cannot read "'+raw+'"');
+    }
+  }
+  return {total,segs};
+}
+
+function breakdownHTML(segs){
+  return segs.map((s,i)=>{
+    const op = i===0 ? (s.sign<0?'−':'') : (s.sign<0?' − ':' + ');
+    if(s.type==='const') return op+s.value;
+    const dice=`${s.n}d${s.sides}${s.exploding?'!':''}`;
+    let faces;
+    if(s.dropped.length){
+      faces='['+s.kept.join(', ')+' <span class="drop">'+s.dropped.join(' ')+'</span>]';
+    } else {
+      faces='['+s.faces.join(', ')+']';
+    }
+    return op+dice+' '+faces;
+  }).join('');
+}
+
+// nat-20 / nat-1 only meaningful on a lone d20
+function critClass(segs){
+  const d20=segs.filter(s=>s.type==='dice'&&s.sides===20);
+  if(d20.length===1 && d20[0].kept.length===1){
+    if(d20[0].kept[0]===20) return 'crit';
+    if(d20[0].kept[0]===1) return 'fail';
+  }
+  return '';
+}
+
 let advMode=0;
 
-// build die buttons
-$('diceRow').innerHTML=DICE.map(d=>`<button class="die" data-d="${d}">d${d}</button>`).join('');
-$('diceRow').onclick=e=>{ const b=e.target.closest('.die'); if(b) roll(+b.dataset.d,+$('qty').value,+$('mod').value); };
+function doRoll(expr){
+  let res;
+  try{ res=rollExpr(expr); }
+  catch(err){ $('total').textContent='—'; $('total').className='total';
+    $('break').className='break err'; $('break').textContent='✕ '+err.message; return; }
+  const cls=critClass(res.segs);
+  let tag='';
+  if(cls==='crit') tag=' <span class="crit-tag">— THE FATES SMILE</span>';
+  if(cls==='fail') tag=' <span class="fail-tag">— THE FATES SCORN</span>';
+  animateTotal(res.total, cls);
+  $('break').className='break';
+  $('break').innerHTML=breakdownHTML(res.segs)+tag;
+  pushLog(res.total, breakdownHTML(res.segs));
+  if(cls) motes(cls==='crit'?'ember':'ash');
+}
 
-// advantage toggle
+// roll driven by the die buttons / qty / mod / adv toggle
+function rollDie(sides,qty,mod){
+  qty=Math.max(1,Math.min(100,qty||1)); mod=mod||0;
+  let expr;
+  if(sides===20 && qty===1 && advMode!==0) expr='2d20'+(advMode>0?'kh1':'kl1');
+  else expr=`${qty}d${sides}`;
+  if(mod) expr+=(mod>0?'+':'-')+Math.abs(mod);
+  doRoll(expr);
+}
+
+/* ─── visual juice (no audio, no haptics) ─── */
+function animateTotal(finalVal, cls){
+  const el=$('total'); const dur=520, start=performance.now();
+  el.className='total rolling';
+  function frame(t){
+    if(t-start<dur){ el.textContent=Math.floor(Math.random()*99)+1; requestAnimationFrame(frame); }
+    else { el.textContent=finalVal; el.className='total settle '+(cls||''); }
+  }
+  requestAnimationFrame(frame);
+}
+function motes(kind){
+  const host=document.querySelector('.result');
+  for(let i=0;i<16;i++){
+    const m=document.createElement('span');
+    m.className='mote '+kind;
+    m.style.left=Math.random()*100+'%';
+    m.style.setProperty('--life',(700+Math.random()*700)+'ms');
+    m.style.animationDelay=(Math.random()*180)+'ms';
+    host.appendChild(m);
+    setTimeout(()=>m.remove(),1700);
+  }
+}
+
+/* ─── roll log (persisted) ─── */
+function pushLog(total,breakdown){
+  const log=$('log');
+  const e=document.createElement('div');
+  e.innerHTML=`<b>${total}</b> &nbsp;<span style="opacity:.7">${breakdown}</span>`;
+  log.prepend(e);
+  while(log.childNodes.length>14) log.removeChild(log.lastChild);
+  saveLog();
+}
+function saveLog(){ try{ localStorage.setItem('doracle.log',$('log').innerHTML); }catch(e){} }
+function loadLog(){ try{ const v=localStorage.getItem('doracle.log'); if(v) $('log').innerHTML=v; }catch(e){} }
+
+/* ════════════════════════════════════════════════════════════════
+   WIRING — dice
+   ════════════════════════════════════════════════════════════════ */
+const DICE=[4,6,8,10,12,20,100];
+$('diceRow').innerHTML=DICE.map(d=>`<button class="die" data-d="${d}">d${d}</button>`).join('');
+$('diceRow').onclick=e=>{ const b=e.target.closest('.die'); if(b) rollDie(+b.dataset.d,+$('qty').value,+$('mod').value); };
+
 document.querySelectorAll('.adv button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.adv button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); advMode=+b.dataset.adv;
 });
 
-function show(total,breakdown,faces,sides,count){
-  const el=$('total'); el.textContent=total; el.className='total';
-  let tag='';
-  if(sides===20 && count===1){
-    if(faces[0]===20){ el.classList.add('crit'); tag=' <span class="crit-tag">— THE FATES SMILE</span>'; }
-    if(faces[0]===1){ el.classList.add('fail'); tag=' <span class="fail-tag">— THE FATES SCORN</span>'; }
-  }
-  $('break').innerHTML=breakdown+tag;
-  const log=$('log'); const e=document.createElement('div');
-  e.innerHTML=`<b>${total}</b> &nbsp;<span style="opacity:.7">${breakdown}</span>`;
-  log.prepend(e); while(log.childNodes.length>14) log.removeChild(log.lastChild);
-}
+$('cast').onclick=()=>doRoll($('notation').value);
+$('notation').addEventListener('keydown',e=>{ if(e.key==='Enter') doRoll($('notation').value); });
 
-function roll(sides,qty,mod){
-  qty=Math.max(1,Math.min(100,qty||1)); mod=mod||0;
-  let faces=[];
-  if(sides===20 && qty===1 && advMode!==0){
-    const a=rnd(20),b=rnd(20); const keep=advMode>0?Math.max(a,b):Math.min(a,b);
-    faces=[keep];
-    const total=keep+mod;
-    show(total,`d20(${advMode>0?'adv':'dis'}) [${a}, ${b}] keep ${keep}${mod?` ${mod>0?'+':''}${mod}`:''}`,faces,20,1);
-    return;
-  }
-  for(let i=0;i<qty;i++) faces.push(rnd(sides));
-  const sum=faces.reduce((a,b)=>a+b,0)+mod;
-  const fstr=qty>1?`[${faces.join(', ')}]`:`[${faces[0]}]`;
-  show(sum,`${qty}d${sides} ${fstr}${mod?` ${mod>0?'+':''}${mod}`:''}`,faces,sides,qty);
-}
-
-// quick rolls (mini dice-notation)
 document.querySelector('.quick').onclick=e=>{
   const b=e.target.closest('button'); if(!b) return;
-  const n=b.dataset.roll;
-  if(n==='4d6dl1'){ const f=[rnd(6),rnd(6),rnd(6),rnd(6)].sort((a,b)=>a-b);
-    const kept=f.slice(1); show(kept.reduce((a,b)=>a+b,0),`4d6 [${f.join(', ')}] drop ${f[0]}`,kept,6,3); return; }
-  if(n==='2d20kh1'){ const a=rnd(20),c=rnd(20),keep=Math.max(a,c);
-    show(keep,`d20(adv) [${a}, ${c}] keep ${keep}`,[keep],20,1); return; }
-  const m=n.match(/(\d+)d(\d+)/); if(m) roll(+m[2],+m[1],0);
+  $('notation').value=b.dataset.roll;
+  doRoll(b.dataset.roll);
 };
 
-// ── Oracle ──
+// keyboard: R re-rolls a d20 — but never while typing in a field
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,select,textarea')) return;
+  if(e.key==='r'||e.key==='R') rollDie(20,1,+$('mod').value);
+});
+
+/* ════════════════════════════════════════════════════════════════
+   THE ORACLE — odds dropdown and the d20 are now one mechanism.
+   Higher roll = "yes"; the odds shift the threshold. The "and / but"
+   shades emerge from how near the die lands to that threshold.
+   ════════════════════════════════════════════════════════════════ */
 $('ask').onclick=()=>{
-  const odds=+$('odds').value, r=Math.random();
-  const ans=$('answer'), sub=$('answerSub');
-  const roll=rnd(20);
-  let yes=r<odds;
-  // exceptional results
-  let text=yes?'Yes':'No', cls=yes?'yes':'no', extra='';
-  if(roll===20){ text='Yes, and…'; cls='yes'; extra='fortune turns sharply in your favour'; }
-  else if(roll===1){ text='No, and…'; cls='no'; extra='and it festers worse than you feared'; }
-  else if(yes && roll>=17){ text='Yes, and…'; extra='with a gift you did not ask for'; }
-  else if(!yes && roll<=4){ text='No, but…'; cls='maybe'; extra='a small mercy is left to you'; }
-  else if(yes && roll<=4){ text='Yes, but…'; cls='maybe'; extra='the price will come due'; }
-  else extra=pick(['so it is written in ash','the bones do not lie','the dark has spoken','the omens hold','as the old ones foretold']);
-  ans.className='answer '+cls; ans.textContent=text;
-  sub.textContent='☽ the oracle die shows '+roll+' · '+extra;
+  const btn=$('ask'), ans=$('answer'), sub=$('answerSub');
+  btn.classList.add('asking'); ans.textContent=''; sub.textContent='';
+  setTimeout(()=>{
+    btn.classList.remove('asking');
+    const odds=+$('odds').value;
+    const roll=rnd(20);
+    const threshold=20-odds*20;        // higher odds → lower bar to clear
+    const yes=roll>threshold;
+    const margin=Math.abs(roll-threshold);
+    let text, cls, extra;
+    if(roll===20){ text='Yes, and…'; cls='yes'; extra='fortune turns sharply in your favour'; }
+    else if(roll===1){ text='No, and…'; cls='no'; extra='and it festers worse than you feared'; }
+    else if(yes && margin<=2){ text='Yes, but…'; cls='maybe'; extra='the price will come due'; }
+    else if(!yes && margin<=2){ text='No, but…'; cls='maybe'; extra='a small mercy is left to you'; }
+    else if(yes){ text='Yes'; cls='yes'; extra=pick(D.oracleFlavor); }
+    else { text='No'; cls='no'; extra=pick(D.oracleFlavor); }
+    ans.className='answer reveal '+cls; ans.textContent=text;
+    sub.textContent='☽ the oracle die shows '+roll+' · '+extra;
+  },650);
 };
 
-// ── Random tables ──
-const TABLES={
-  "NPC name":["Bram Hollowatch","Sister Veil","Old Tussock","Marisha Qu11","Edrik the Lesser","Goodwife Penn","Cael Underbough","Mother Sorrel","Tobias Grime","Lady Ashfen","Pol the Tinker","Henrietta Vane"],
-  "Tavern":["The Drowned Rat","The Gilded Sow","The Last Lantern","The Broken Compass","The Salt & Sorrow","The Tipsy Lich","The Hearth & Hound","The Mended Mug","The Crooked Crown","The Weeping Widow"],
-  "Encounter":["A merchant whose cart has thrown a wheel — and he's lying about the cargo.","Three goblins arguing over a map they can't read.","A bridge troll who only wants someone to talk to.","A wounded knight begging you to finish her quest.","Bandits, but they're terrible at it.","A talking raven repeating a dead man's last words.","A pilgrim heading the wrong way, cheerfully.","Wolves circling — or are they being herded?"],
-  "Loot":["A ring that hums near untruths.","47 silver, a love letter, and a tooth.","A map to somewhere that no longer exists.","A vial of something that should not glow.","A finely-made dagger with a stranger's initials.","Three keys, two locks, one regret.","A spellbook missing its most important page.","A coin that always lands on its edge."],
-  "Plot hook":["The village's children have all dreamed the same dream.","A noble pays triple to deliver a sealed box — unopened, by dawn.","The well water has started running backwards.","A rival adventuring party has gone silent in the deeps.","Someone is selling memories that aren't theirs.","The dead are politely refusing to stay buried.","A star fell, and something climbed out of the crater."],
-  "Omen":["Birds wheel widdershins over the keep.","Milk soured in every pail before noon.","The candles all gutter toward the door.","A bell tolls with no hand to ring it.","Your shadow is a half-step slow today.","Salt spilled itself across the threshold."]
+/* ════════════════════════════════════════════════════════════════
+   THE LOREWEAVER — composable worldbuilding generators.
+   Each stitches fragments from D into a small seed.
+   ════════════════════════════════════════════════════════════════ */
+const GEN={
+  'NPC':()=>({title:'A face in the world',items:[
+    ['Name',pick(D.npcNames)],
+    ['They are',`a ${pick(D.npcRole)}, ${pick(D.npcLook)}`],
+    ['Manner',pick(D.npcManner)],
+    ['But secretly',pick(D.npcSecret)],
+  ]}),
+  'Tavern':()=>({title:'A place to drink',items:[
+    ['By the sign of',pick(D.tavernNames)],
+    ['Inside',pick(D.tavernSensory)],
+    ['A regular',pick(D.tavernPatron)],
+    ['Word is',pick(D.tavernRumor)],
+  ]}),
+  'Settlement':()=>({title:'A place on the map',items:[
+    ['Name',pick(D.townNames)],
+    ['A',`${pick(D.townSize)}, known for ${pick(D.townFeature)}`],
+    ['Troubled by',pick(D.townTrouble)],
+    ['Held by',pick(D.townRuler)],
+  ]}),
+  'Faction':()=>({title:'A power with designs',items:[
+    ['Name',pick(D.factionNames)],
+    ['Seeks',pick(D.factionGoal)],
+    ['Through',pick(D.factionMethod)],
+    ['Undone by',pick(D.factionFlaw)],
+  ]}),
+  'Wilds':()=>({title:'A stretch of country',items:[
+    ['Region',pick(D.regionBiome)],
+    ['Marked by',pick(D.regionLandmark)],
+    ['Home to',pick(D.regionDenizen)],
+    ['And yet',pick(D.regionWrong)],
+  ]}),
+  'Dungeon':()=>({title:'A chamber in the dark',items:[
+    ['The room',pick(D.dungeonRoom)],
+    ['You notice',pick(D.dungeonDetail)],
+    ['A danger',pick(D.dungeonHazard)],
+    ['The way on',pick(D.dungeonExit)],
+  ]}),
 };
-$('tables').innerHTML=Object.keys(TABLES).map(t=>`<button data-t="${t}">${t}</button>`).join('');
-$('tables').onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
-  const t=b.dataset.t;
-  $('draw').innerHTML=`<span class="src">${t}</span>${pick(TABLES[t])}`;
+$('gen').innerHTML=Object.keys(GEN).map(g=>`<button data-g="${g}">${g}</button>`).join('');
+$('gen').onclick=e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  const out=GEN[b.dataset.g]();
+  $('lore').className='lore';
+  $('lore').innerHTML='<div class="lore-title">'+out.title+'</div>'+
+    out.items.map(([l,t])=>`<div class="lore-item"><span class="lbl">${l}</span>${t}</div>`).join('');
 };
 
-// keyboard: R re-rolls last quick d20
-document.addEventListener('keydown',e=>{ if(e.key==='r'||e.key==='R') roll(20,1,+$('mod').value); });
+/* ════════════════════════════════════════════════════════════════
+   RANDOM TABLES — built-ins + user-forged, persisted
+   ════════════════════════════════════════════════════════════════ */
+let custom={};
+try{ custom=JSON.parse(localStorage.getItem('doracle.tables')||'{}'); }catch(e){ custom={}; }
+
+function allTables(){ return Object.assign({}, D.tables, custom); }
+function renderTables(){
+  const t=allTables();
+  $('tables').innerHTML=Object.keys(t).map(name=>{
+    const isCustom=name in custom;
+    return `<button data-t="${name}" class="${isCustom?'custom':''}">${name}`+
+      (isCustom?` <span class="kill" data-kill="${name}" title="forget table">✕</span>`:'')+`</button>`;
+  }).join('');
+}
+$('tables').onclick=e=>{
+  const kill=e.target.closest('.kill');
+  if(kill){ e.stopPropagation(); delete custom[kill.dataset.kill];
+    localStorage.setItem('doracle.tables',JSON.stringify(custom)); renderTables(); return; }
+  const b=e.target.closest('button'); if(!b) return;
+  const name=b.dataset.t;
+  $('draw').innerHTML=`<span class="src">${name}</span>${pick(allTables()[name])}`;
+};
+
+// forge-your-own
+$('forgeToggle').onclick=()=>$('forge').classList.toggle('open');
+$('forgeGo').onclick=()=>{
+  const name=$('forgeName').value.trim();
+  const items=$('forgeItems').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!name || !items.length){ $('forgeName').focus(); return; }
+  custom[name]=items;
+  localStorage.setItem('doracle.tables',JSON.stringify(custom));
+  $('forgeName').value=''; $('forgeItems').value=''; $('forge').classList.remove('open');
+  renderTables();
+};
+
+/* ════════════════════════════════════════════════════════════════
+   THE GRIMOIRE — magic. Works fully offline on built-in fragments.
+   The "deeper well" toggle (off by default, persisted) pulls live
+   SRD content from dnd5eapi.co when there's a connection; any failure
+   falls back silently to the offline forge.
+   ════════════════════════════════════════════════════════════════ */
+const API='https://www.dnd5eapi.co';
+let well=false;
+try{ well=localStorage.getItem('doracle.well')==='1'; }catch(e){}
+$('wellToggle').checked=well;
+function setNet(){ const el=$('netState');
+  el.textContent='live SRD · '+(well?'on':'off');
+  el.className='net '+(well?'on':'off'); }
+setNet();
+$('wellToggle').onchange=e=>{ well=e.target.checked;
+  try{ localStorage.setItem('doracle.well',well?'1':'0'); }catch(e){} setNet(); };
+
+function grimOut(parts){ // parts: {name, meta, body, cost, src}
+  $('grim').className='grim';
+  $('grim').innerHTML=
+    (parts.name?`<div class="grim-name">${parts.name}</div>`:'')+
+    (parts.meta?`<div class="grim-meta">${parts.meta}</div>`:'')+
+    (parts.body?`<div class="grim-body">${parts.body}</div>`:'')+
+    (parts.cost?`<div class="grim-cost">${parts.cost}</div>`:'')+
+    (parts.src?`<div class="grim-src">${parts.src}</div>`:'');
+}
+function grimLoading(){ $('grim').className='grim loading'; $('grim').textContent='drawing from the deep…'; }
+
+// offline forges
+function forgeSpell(){
+  const name=`${pick(D.spellWho)}'s ${pick(D.spellAdj)} ${pick(D.spellNoun)}`;
+  return {name, meta:`Level ${rnd(9)} · ${pick(D.spellSchool)}`,
+    body:'It '+pick(D.spellEffect), cost:'At a price: '+pick(D.spellCost), src:'forged offline'};
+}
+function forgeRelic(){
+  return {name:pick(D.relicNames), meta:pick(D.relicRarity),
+    body:pick(D.relicPower), src:'forged offline'};
+}
+
+// live-SRD draws (with offline fallback)
+async function drawFromAPI(kind){
+  const r=await fetch(API+'/api/2014/'+kind);
+  if(!r.ok) throw new Error('net');
+  const list=(await r.json()).results;
+  const chosen=pick(list);
+  const dr=await fetch(API+chosen.url);
+  if(!dr.ok) throw new Error('net');
+  return dr.json();
+}
+async function drawSpell(){
+  if(!well){ grimOut(forgeSpell()); return; }
+  grimLoading();
+  try{
+    const s=await drawFromAPI('spells');
+    grimOut({ name:s.name,
+      meta:`Level ${s.level} · ${s.school?s.school.name:'—'} · ${s.casting_time||''}`.trim(),
+      body:(s.desc&&s.desc[0])?s.desc[0]:'(no description)',
+      cost:s.range?`Range ${s.range} · Duration ${s.duration||'—'}`:'',
+      src:'the deeper well · dnd5eapi.co' });
+  }catch(err){ const f=forgeSpell(); f.src='deep well silent — forged offline'; grimOut(f); }
+}
+async function drawRelic(){
+  if(!well){ grimOut(forgeRelic()); return; }
+  grimLoading();
+  try{
+    const it=await drawFromAPI('magic-items');
+    grimOut({ name:it.name,
+      meta:it.rarity?it.rarity.name||it.rarity:'magic item',
+      body:(it.desc&&it.desc[0])?it.desc[0]:'(no description)',
+      src:'the deeper well · dnd5eapi.co' });
+  }catch(err){ const f=forgeRelic(); f.src='deep well silent — forged offline'; grimOut(f); }
+}
+$('spellBtn').onclick=drawSpell;
+$('relicBtn').onclick=drawRelic;
+$('surgeBtn').onclick=()=>grimOut({ name:'A Wild Magic Surge',
+  meta:'d100 · raw chaos', body:pick(D.wildMagic), src:'the weave frays' });
+
+/* ════════════════════════════════════════════════════════════════
+   DATA — all content lives here, behind the logic wall.
+   Add tables / fragments freely without touching anything above.
+   ════════════════════════════════════════════════════════════════ */
+const D={
+  tables:{
+    "NPC name":["Bram Hollowatch","Sister Veil","Old Tussock","Marisha Quill","Edrik the Lesser","Goodwife Penn","Cael Underbough","Mother Sorrel","Tobias Grime","Lady Ashfen","Pol the Tinker","Henrietta Vane"],
+    "Tavern":["The Drowned Rat","The Gilded Sow","The Last Lantern","The Broken Compass","The Salt & Sorrow","The Tipsy Lich","The Hearth & Hound","The Mended Mug","The Crooked Crown","The Weeping Widow"],
+    "Encounter":["A merchant whose cart has thrown a wheel — and he's lying about the cargo.","Three goblins arguing over a map they can't read.","A bridge troll who only wants someone to talk to.","A wounded knight begging you to finish her quest.","Bandits, but they're terrible at it.","A talking raven repeating a dead man's last words.","A pilgrim heading the wrong way, cheerfully.","Wolves circling — or are they being herded?"],
+    "Loot":["A ring that hums near untruths.","47 silver, a love letter, and a tooth.","A map to somewhere that no longer exists.","A vial of something that should not glow.","A finely-made dagger with a stranger's initials.","Three keys, two locks, one regret.","A spellbook missing its most important page.","A coin that always lands on its edge."],
+    "Plot hook":["The village's children have all dreamed the same dream.","A noble pays triple to deliver a sealed box — unopened, by dawn.","The well water has started running backwards.","A rival adventuring party has gone silent in the deeps.","Someone is selling memories that aren't theirs.","The dead are politely refusing to stay buried.","A star fell, and something climbed out of the crater."],
+    "Omen":["Birds wheel widdershins over the keep.","Milk soured in every pail before noon.","The candles all gutter toward the door.","A bell tolls with no hand to ring it.","Your shadow is a half-step slow today.","Salt spilled itself across the threshold."]
+  },
+
+  oracleFlavor:["so it is written in ash","the bones do not lie","the dark has spoken","the omens hold","as the old ones foretold"],
+
+  /* ── NPC ── */
+  npcNames:["Bram Hollowatch","Sister Veil","Old Tussock","Marisha Quill","Edrik the Lesser","Cael Underbough","Mother Sorrel","Tobias Grime","Lady Ashfen","Pol the Tinker","Henrietta Vane","Garrow Stilt","Wren Ashby","Doctor Mire","Saint-of-Wells","Otho Cribb"],
+  npcRole:["hedge-witch","disgraced knight","river-barge captain","tax collector","gravedigger","spice merchant","wandering friar","fence for stolen goods","retired headsman","ratcatcher","mapmaker","court poet fallen on hard times","midwife","relic-smuggler"],
+  npcLook:["all knuckles and grey stubble","far too well-dressed for the hour","missing two fingers and not saying how","with kind eyes and a cruel mouth","wrapped in mourning black, years too long","whip-thin, never quite still","soft-spoken, with a soldier's scars","perfumed to hide something worse"],
+  npcManner:["counts coins while they talk to you","never once meets your eye","laughs a beat too late at their own jokes","quotes scripture they clearly don't believe","keeps glancing at the door","speaks to you as if resuming an old argument","offers you food before names"],
+  npcSecret:["they are not who the town thinks they are.","they owe a debt to something inhuman.","they've already sold you out — they just feel bad about it.","they're searching for a child that may never have existed.","they killed the last person who asked these questions.","they are dying, and racing a clock no one else can see.","they serve the very thing you've come to stop."],
+
+  /* ── Tavern ── */
+  tavernNames:["The Drowned Rat","The Gilded Sow","The Last Lantern","The Broken Compass","The Salt & Sorrow","The Tipsy Lich","The Hearth & Hound","The Mended Mug","The Crooked Crown","The Weeping Widow"],
+  tavernSensory:["the fire smokes wrong, sweet and resinous","every surface is sticky with old mead","it is far too quiet for the crowd it holds","a minstrel plays a song no one requested, badly","the floor slopes hard toward the cellar door","antlers and worse line every wall"],
+  tavernPatron:["nurses one cup all night and watches the stairs.","is winning at dice and shouldn't be.","weeps quietly in the corner and waves off help.","is clearly a noble in a servant's cloak.","hasn't moved or blinked in an hour.","tries to recruit you within two minutes."],
+  tavernRumor:["the old lord's heir was seen alive, after the funeral.","the bridge toll has tripled, and the toll-keeper has fangs now.","whatever's in the mine is paying better than the mine ever did.","three travellers took the forest road last week; none came out.","the chapel bell rings itself, always at the wrong hour."],
+
+  /* ── Settlement ── */
+  townNames:["Mournhollow","Greywick","Saltmarrow","Thornfield","Bell's Reach","Dour-on-the-Water","Hagsbridge","Lower Pyre","Aldercross","Stonewept"],
+  townSize:["muddy hamlet of forty souls","walled market town","fortified river-crossing","half-abandoned mining camp","prosperous-looking trade port","cloistered shrine-village"],
+  townFeature:["its bell-foundry","a shrine that supposedly weeps real tears","the finest horses in three counties","a yearly market that draws strangers from nowhere known","the gallows tree at its centre","cheese, and keeping its own counsel"],
+  townTrouble:["a blight no priest can name.","a feud between its two great families.","a tax it cannot possibly pay.","disappearances, one each new moon.","a flood of refugees it can't feed.","a 'protector' it can no longer afford to refuse."],
+  townRuler:["an aged reeve who fears change more than ruin.","a council of guilds that agrees on nothing.","a knight-captain stationed here as punishment.","a charming outsider who arrived only last spring.","the temple, in all but name.","no one — and that is the whole problem."],
+
+  /* ── Faction ── */
+  factionNames:["The Ashen Hand","The Quiet Ledger","Order of the Drowned Star","The Tallow Guild","Sons of the Long Winter","The Veiled Court","The Threadbare Saints","House Carrion"],
+  factionGoal:["to wake something that ought to stay sleeping","to buy every debt in the realm","to restore a bloodline the world has forgotten","to keep one terrible secret buried","to become the only law worth fearing","to feed a hunger that is never sated"],
+  factionMethod:["patient bribery and patient blades","faith twisted into a weapon","controlling who eats and who starves","blackmail gathered over generations","zealots who genuinely believe","trade routes no rival can match"],
+  factionFlaw:["a schism between its old guard and its young.","a leader who is already, secretly, dead.","a debt to a power even they fear.","one true believer about to lose their faith.","they cannot stop expanding, and it shows.","the very secret they protect is a lie."],
+
+  /* ── Wilds ── */
+  regionBiome:["a drowned forest of black water and grey trunks","high moorland under perpetual low cloud","a chalk-cut river valley, terribly green","ash barrens where nothing has grown in living memory","fog-bound fenland threaded with hidden causeways","an old-growth wood that swallows sound"],
+  regionLandmark:["a stone circle the locals refuse to name","a watchtower, recently and badly repaired","a waterfall that runs warm in winter","a bridge older than any road that meets it","a barrow mound with a fresh offering on it","a dead god's hand, the size of a barn, half-sunk in mud"],
+  regionDenizen:["a recluse who knows every path and trusts none of them","things that only move when the mist is thick","a herd-folk who pay tribute to something underground","a single, very old, very patient predator","exiles who'd rather you'd never come","pilgrims walking a circuit that never ends"],
+  regionWrong:["the stars here are subtly the wrong ones.","nothing born here casts a shadow at noon.","the dead don't decay; they simply go missing.","compasses spin, then point firmly at the wrong thing.","it is always, very faintly, the smell of smoke.","time runs slow — a night here, a week outside."],
+
+  /* ── Dungeon ── */
+  dungeonRoom:["a collapsed shrine, its idol face-down in rubble","a flooded gallery, black water to the knee","a vaulted hall lined with empty stone sarcophagi","a cramped guardroom, cold hearth still smoking faintly","a natural cavern threaded with luminous fungus","a library rotted to pulp, one shelf untouched","a torture chamber, its tools too clean","a bridge over a chasm with no visible bottom"],
+  dungeonDetail:["claw-marks gouged on the inside of the door.","a fresh meal, still warm, with no one to eat it.","names scratched into the wall — the last one yours.","a draft that carries distant, rhythmic breathing.","old bloodstains arranged too neatly to be accidents.","a single candle burning that no one lit."],
+  dungeonHazard:["a pressure plate, already half-depressed.","spores that bloom gold and steal an hour of memory.","a ceiling lower than it was a moment ago.","something patient in the water, waiting to be stepped over.","a ward that screams in a dead language when crossed.","a guardian that only wakes if you take what's here."],
+  dungeonExit:["a stair spiralling down into colder air.","a crack just wide enough, and a choice to squeeze through.","a door that locks behind you with a soft, final click.","three passages; two of them lie.","a shaft going up, toward a light that shouldn't be there.","back the way you came — but it's different now."],
+
+  /* ── Grimoire: offline spell forge ── */
+  spellWho:["Mordrak","Vss the Pale","the Sunken Choir","Iltheri","the Ashen Magister","Bess Crowmoor","the Last Lich","Quill","the Veiled One","Otho"],
+  spellAdj:["Withering","Gilded","Hollow","Screaming","Frostbound","Unseen","Devouring","Mirrored","Whispering","Sundering"],
+  spellNoun:["Veil","Bolt","Ward","Grasp","Beacon","Chains","Mantle","Hunger","Lantern","Knell"],
+  spellSchool:["Evocation","Necromancy","Illusion","Abjuration","Conjuration","Enchantment","Transmutation","Divination"],
+  spellEffect:["scours a 15-ft line with spectral cold (3d8, Dex save halves).","binds a creature in light only the caster can see; it is restrained while it holds.","turns every spoken lie within 30 ft into visible black smoke.","wards a threshold so the unquiet dead cannot cross it for a day.","drags one willing creature one step sideways, out of the world, for a round.","lets the caster borrow the eyes of any beast they have ever named.","stitches a wound shut — but the scar remembers, and aches near danger.","calls a silence so total that no spell may be spoken within it."],
+  spellCost:["the caster ages a single day with each casting.","once spoken aloud, it cannot be unmade.","shadows lean toward the caster for an hour after.","every casting dims the nearest living flame.","the caster's reflection lags a heartbeat behind, all day.","something on the other side now knows the caster's name."],
+
+  /* ── Grimoire: offline relics ── */
+  relicNames:["The Quiet Blade","Lantern of Last Light","Ring of the Drowned King","The Mendicant's Bowl","Coin of the Ferryman","Gauntlet of Borrowed Strength","The Weeping Compass","Shroud of Nine Names"],
+  relicRarity:["uncommon","rare","very rare","legendary · attunement","cursed · attunement"],
+  relicPower:["It never makes a sound — no ring of steel, no whistle of air. Attacks made with it have advantage against the unaware.","It sheds dim light in a 20-ft radius that the undead actively flee.","Underwater, you breathe and speak freely — but the drowned can always find you.","Whatever you place in it, you find doubled by morning. It will not double coin twice.","Spent at a threshold, it lets one creature cross where they could not before. It is never returned.","Once per dawn, treat your Strength as 20 for one mighty effort, then fall prone, spent.","Its needle ignores north and points instead toward what you most fear to find.","Worn over the face, you may take on the appearance of anyone whose name you speak — and lose your own for an hour."],
+
+  /* ── Grimoire: wild magic surges (d100 chaos) ── */
+  wildMagic:["Your skin turns faintly translucent for 1 minute; your heartbeat is visible.","Harmless faerie-light pours from your mouth whenever you speak for the next minute.","You and the nearest creature swap voices for 1 hour.","Flowers bloom in your footprints for 1 minute.","You cast fireball centred on yourself (no save for you — take the full hit).","Every nonmagical flame within 30 ft turns deep blue and gutters low.","You shrink one size category for 1d4 rounds.","A spectral hand appears and mirrors your gestures for 1 hour, one beat late.","You can only speak in rhyme until your next long rest.","An echo of your spell fires again next round at a random creature you can see.","Your shadow detaches and sulks in a corner until dawn; it will not help.","The faint smell of brimstone clings to you; animals will not come near for an hour.","You regain your lowest-level expended spell slot.","A unicorn, mildly inconvenienced, appears for 1 round and then leaves.","Your weight triples until the end of your next turn.","For 1 minute, anyone who touches you takes a tiny static shock and a vivid memory of your last meal.","You grow a magnificent beard of writhing mist that disperses in an hour.","Roll on this table twice more and apply both, ignoring further surges."],
+
+  adventureSite:[
+    "THE HUNGERING STAIR — a tower with one staircase that descends forever; the deeper you go, the younger the architecture, until you reach a door that was sealed before the world had a name.",
+    "SALTGLASS REEF — a coastal village built atop a sunken cathedral; at the lowest tide the bell-tower breaches, and on those nights the drowned come up to attend a service no one living remembers.",
+    "THE MARROW MARKET — a bazaar that exists only in the hour after midnight, in whatever ruin is nearest. It sells what you've lost — names, years, the dead — and the prices are exactly fair.",
+    "ARDENT WOOD — an old forest where every tree is a sleeping soldier from a war that never officially ended. Wake one and you inherit the war, the orders, and the enemy.",
+    "THE GLASS ABBEY — a monastery of mirror-walled cells where monks copy a single book by reflection. The book writes the future; they are three pages behind, and falling further.",
+    "COLDFORGE DEEP — a dwarfhold abandoned mid-meal, every hearth still warm, every tool laid down gently, no bodies and no blood. Something asked them to leave, politely, and they did."
+  ]
+};
+
+/* boot */
+D.tables["Adventure site"]=D.adventureSite;   // default areas for inspiration
+renderTables();
+loadLog();
 </script>
 </body>
 </html>
