@@ -10,7 +10,11 @@
       "Bash(curl -sI \"https://www.dnd5eapi.co/api/2014/spells\")",
       "Bash(awk '/^<script>/{f=1;next} /^<\\\\/script>/{f=0} f' index.html)",
       "Bash(node --check /tmp/dd.js)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(curl -sL \"https://www.dnd5eapi.co/api/2014/monsters\")",
+      "Bash(python -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('count:',d['count']\\);print\\('first:',d['results'][0]\\)\")",
+      "Bash(curl -sL \"https://www.dnd5eapi.co/api/2014/monsters/goblin\")",
+      "Bash(python -c ' *)"
     ]
   }
 }
