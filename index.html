@@ -7,193 +7,203 @@
 <meta name="description" content="A tabletop GM toolkit: dice-notation roller, a yes/no oracle, worldbuilding generators, a grimoire, a bestiary, and custom random tables.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Special+Elite&family=Bitter:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Cinzel+Decorative:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#e6e9de;--card:#fbfbf2;--paper2:#f3f4ea;
-    --grid:rgba(54,92,128,.13);--gridM:rgba(54,92,128,.22);
-    --ink:#2b3742;--bone:#212b33;--dim:#7b837b;
-    --blood:#a8321c;--gold:#a9781a;--ember:#c2611f;--arc:#2f6bb0;
-    --line:rgba(43,55,66,.26);
-    --hand:'Architects Daughter',cursive;--serif:'Bitter',Georgia,serif;--mono:'Special Elite','Courier New',monospace}
+    --parch:#e9d6aa;--card:#f4e8c6;--card2:#efe0ba;--panelTop:#f6eccb;
+    --ink:#3a2c16;--ink2:#5a4626;--dim:#8a7449;
+    --red:#7c1f12;--gold:#9a7a2f;--gold2:#c2a24e;--arc:#4a3b6e;--green:#48571f;
+    --line:rgba(120,90,40,.38);
+    --display:'Cinzel',serif;--decor:'Cinzel Decorative',serif;
+    --serif:'EB Garamond',Georgia,serif;--mono:'Courier New',monospace}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background-color:var(--paper);
-    background-image:
-      linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px),
-      linear-gradient(var(--gridM) 1px,transparent 1px),linear-gradient(90deg,var(--gridM) 1px,transparent 1px);
-    background-size:24px 24px,24px 24px,120px 120px,120px 120px;
-    color:var(--ink);font-family:var(--serif);font-size:17px;min-height:100vh;padding:2rem 1rem;overflow-x:hidden}
-  /* heavily-worn paper: coffee rings, foxing stains, photocopy speckle, aged edges */
+  body{font-family:var(--serif);color:var(--ink);font-size:17px;min-height:100vh;padding:2rem 1rem;overflow-x:hidden;
+    background:
+      radial-gradient(ellipse 80% 55% at 50% -8%,#f3e7c0,transparent 70%),
+      radial-gradient(ellipse 100% 70% at 50% 118%,#dcc391,transparent 72%),
+      #e6d2a4}
+  /* aged parchment: soft mottling + warm vignette */
   body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;mix-blend-mode:multiply;
     background-image:
-      radial-gradient(circle 56px at 86% 13%,transparent 47px,rgba(120,82,38,.22) 48px,rgba(120,82,38,.05) 55px,transparent 57px),
-      radial-gradient(ellipse 150px 95px at 11% 24%,rgba(120,86,40,.10),transparent 70%),
-      radial-gradient(ellipse 220px 130px at 80% 90%,rgba(120,86,40,.09),transparent 72%),
-      radial-gradient(circle 3px at 30% 62%,rgba(80,60,30,.20),transparent),
-      radial-gradient(circle 2px at 64% 40%,rgba(80,60,30,.18),transparent),
-      radial-gradient(circle 2px at 22% 80%,rgba(80,60,30,.16),transparent),
-      radial-gradient(circle 4px at 54% 86%,rgba(80,60,30,.14),transparent);
-    box-shadow:inset 0 0 160px 40px rgba(90,70,40,.14)}
-  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;mix-blend-mode:multiply;
-    background-image:radial-gradient(rgba(40,50,60,.16) .5px,transparent .7px);background-size:5px 5px}
+      radial-gradient(ellipse 240px 160px at 12% 20%,rgba(120,86,40,.10),transparent 70%),
+      radial-gradient(ellipse 300px 200px at 86% 78%,rgba(120,86,40,.10),transparent 72%),
+      radial-gradient(ellipse 180px 120px at 70% 12%,rgba(100,70,30,.07),transparent 70%),
+      radial-gradient(circle 2px at 30% 60%,rgba(80,55,20,.10),transparent),
+      radial-gradient(circle 2px at 62% 42%,rgba(80,55,20,.08),transparent);
+    box-shadow:inset 0 0 200px 60px rgba(90,60,20,.28)}
   .wrap{position:relative;z-index:1;max-width:880px;margin:0 auto}
 
+  /* ── header ── */
   header{text-align:center;margin-bottom:2rem}
-  .d20mark{display:block;width:48px;margin:0 auto .3rem;color:var(--arc);opacity:.85}
-  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--blood);margin-bottom:.15rem}
-  h1{font-family:var(--hand);font-weight:400;font-size:3.1rem;letter-spacing:.01em;color:var(--ink);line-height:1.04}
+  .modes{display:inline-flex;border:1px solid var(--gold);border-radius:3px;overflow:hidden;margin-bottom:1.2rem;
+    box-shadow:0 1px 0 rgba(120,90,40,.25)}
+  .modebtn{font-family:var(--display);font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    padding:.5rem 1.1rem;cursor:pointer;border:none;background:transparent;color:var(--ink2);transition:all .18s}
+  .modebtn+.modebtn{border-left:1px solid var(--gold)}
+  .modebtn.on{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d08;text-shadow:0 1px 0 rgba(255,255,255,.2)}
+  .modebtn:not(.on):hover{background:rgba(154,122,47,.14)}
+  .d20mark{display:block;width:50px;margin:0 auto .35rem;color:var(--gold);opacity:.92;
+    filter:drop-shadow(0 1px 3px rgba(120,90,40,.4))}
+  .eyebrow{font-family:var(--display);font-size:.72rem;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--red);margin-bottom:.3rem}
+  h1{font-family:var(--decor);font-weight:700;font-size:2.5rem;letter-spacing:.01em;color:var(--ink);line-height:1.12}
+  h1 .orn{color:var(--gold);font-family:var(--serif);font-size:1.5rem;vertical-align:middle;margin:0 .7rem;opacity:.85}
 
-  .grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1.4rem}
-  @media(max-width:760px){.grid{grid-template-columns:1fr}}
-  .card{position:relative;background:var(--card);border:1.5px solid var(--ink);border-radius:2px;padding:1.5rem 1.4rem 1.4rem;
-    box-shadow:2px 3px 0 rgba(43,55,66,.10),0 7px 20px rgba(40,50,60,.13)}
-  .grid>.card:nth-child(odd){transform:rotate(-.35deg)}
-  .grid>.card:nth-child(even){transform:rotate(.4deg)}
-  .card+.card,.grid+.card,.card+.grid{margin-top:1.4rem}
-  /* hand-drawn inner line */
-  .card::after{content:'';position:absolute;inset:4px;border:1px solid rgba(43,55,66,.22);border-radius:2px;pointer-events:none}
-  /* a strip of masking tape on the corner */
-  .card::before{content:'';position:absolute;top:-9px;left:20px;width:64px;height:21px;transform:rotate(-4deg);z-index:3;
-    background:rgba(206,196,150,.45);border:1px solid rgba(150,140,90,.3);box-shadow:0 1px 2px rgba(0,0,0,.08)}
-  .card.arcane::before{background:rgba(132,170,206,.4);border-color:rgba(70,120,170,.32);transform:rotate(3deg);left:auto;right:20px}
-  .card h2{font-family:var(--hand);font-size:1.75rem;font-weight:400;margin-bottom:1rem;color:var(--ink);
-    display:flex;align-items:center;gap:.55rem;line-height:1}
-  .card h2::before{content:'';width:13px;height:13px;background:var(--blood);transform:rotate(45deg);border:1px solid rgba(0,0,0,.18)}
-  .card.arcane h2::before{background:var(--arc)}
+  /* ── deck / cards ── */
+  .deck{display:grid;grid-template-columns:1.3fr 1fr;gap:1.5rem}
+  .deck+.deck{margin-top:1.5rem}
+  @media(max-width:760px){.deck{grid-template-columns:1fr}}
+  .card{position:relative;padding:1.7rem 1.5rem 1.5rem;border:2px solid var(--gold);border-radius:3px;
+    background:linear-gradient(180deg,var(--panelTop),var(--card2));
+    box-shadow:0 0 0 1px rgba(120,90,40,.3) inset,0 2px 14px rgba(120,90,40,.18) inset,0 8px 26px rgba(80,55,20,.22)}
+  .card::after{content:'';position:absolute;inset:5px;border:1px solid rgba(120,90,40,.32);border-radius:2px;pointer-events:none}
+  /* fleuron breaking the top border */
+  .card::before{content:'❦';position:absolute;top:-.72rem;left:50%;transform:translateX(-50%);z-index:2;
+    background:var(--panelTop);padding:0 .55rem;color:var(--gold);font-size:1rem;line-height:1}
+  .card.arcane::before{content:'✦';color:var(--arc)}
+  .card h2{font-family:var(--display);font-size:1.18rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--ink);display:flex;align-items:center;gap:.55rem;margin-bottom:1.1rem;
+    border-bottom:1px solid var(--line);padding-bottom:.55rem}
+  .card h2::before{content:'❖';color:var(--gold);font-size:.9rem}
+  .card.arcane h2::before{color:var(--arc)}
 
-  /* free-text dice notation */
+  /* ── dice ── */
   .cast-row{display:flex;gap:.5rem;margin-bottom:1rem}
-  .cast-row input{flex:1;font-family:var(--mono);font-size:.82rem;background:var(--paper2);border:1.5px solid var(--ink);
+  .cast-row input{flex:1;font-family:var(--mono);font-size:.82rem;background:#f8eecb;border:1px solid var(--gold);
     color:var(--ink);padding:.55rem .6rem;border-radius:2px}
-  .cast-row input:focus{outline:none;border-color:var(--blood);background:#fff}
+  .cast-row input:focus{outline:none;border-color:var(--red);background:#fdf6dd}
   .cast-row input::placeholder{color:var(--dim)}
-  .cast-row button{font-family:var(--hand);font-size:1.15rem;padding:.2rem 1.1rem;cursor:pointer;border-radius:2px;
-    border:1.5px solid var(--blood);color:var(--blood);background:var(--paper2);transition:all .15s}
-  .cast-row button:hover{background:var(--blood);color:var(--card)}
-
+  .cast-row button{font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;
+    padding:.4rem 1.1rem;cursor:pointer;border-radius:2px;border:1px solid var(--red);color:#fdf6dd;
+    background:linear-gradient(180deg,#9a2a1a,var(--red));transition:all .18s}
+  .cast-row button:hover{box-shadow:0 0 0 2px rgba(124,31,18,.25)}
   .dice-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
-  .die{font-family:var(--mono);font-size:.8rem;padding:.5rem .7rem;cursor:pointer;border-radius:2px;
-    border:1.5px solid var(--ink);background:var(--paper2);color:var(--ink);transition:all .12s;min-width:48px}
-  .die:hover{background:#fff;transform:translateY(-2px) rotate(-1deg);box-shadow:1px 2px 0 rgba(43,55,66,.3)}
+  .die{font-family:var(--display);font-weight:600;font-size:.78rem;padding:.5rem .7rem;cursor:pointer;border-radius:2px;
+    border:1px solid var(--gold);background:linear-gradient(180deg,#f6ecca,#ecdcae);color:var(--ink);transition:all .14s;min-width:48px}
+  .die:hover{border-color:var(--red);color:var(--red);transform:translateY(-2px);box-shadow:0 4px 10px rgba(120,90,40,.3)}
   .opts{display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem}
   .opt{display:flex;flex-direction:column;gap:.3rem}
-  .opt label{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
-  .opt input{font-family:var(--mono);width:64px;background:var(--paper2);border:1.5px solid var(--ink);
-    color:var(--ink);text-align:center;padding:.4rem;border-radius:2px}
-  .opt input:focus{outline:none;border-color:var(--blood);background:#fff}
+  .opt label{font-family:var(--display);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+  .opt input{font-family:var(--mono);width:64px;background:#f8eecb;border:1px solid var(--gold);color:var(--ink);text-align:center;padding:.4rem;border-radius:2px}
+  .opt input:focus{outline:none;border-color:var(--red);background:#fdf6dd}
   .adv{display:flex;gap:.3rem}
-  .adv button{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.04em;border-radius:2px;
-    padding:.45rem .55rem;cursor:pointer;border:1.5px solid var(--ink);background:var(--paper2);color:var(--dim)}
-  .adv button.on{border-color:var(--blood);color:var(--blood);background:#fff}
+  .adv button{font-family:var(--display);font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-radius:2px;
+    padding:.45rem .55rem;cursor:pointer;border:1px solid var(--gold);background:#f1e2b4;color:var(--dim)}
+  .adv button.on{border-color:var(--red);color:var(--red);background:#fdf6dd}
 
-  .result{position:relative;text-align:center;padding:1.3rem 0;border-top:1.5px dashed var(--line);
-    border-bottom:1.5px dashed var(--line);margin-bottom:1rem;overflow:hidden}
-  .result .total{font-family:var(--hand);font-size:4.2rem;font-weight:400;line-height:1;color:var(--ink)}
+  .result{position:relative;text-align:center;padding:1.4rem 0;margin-bottom:1rem;overflow:hidden;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .result .total{font-family:var(--decor);font-weight:700;font-size:3.8rem;line-height:1;color:var(--ink)}
   .result .total.rolling{color:var(--dim)}
   .result .total.settle{animation:settle .42s cubic-bezier(.2,1.5,.4,1)}
   @keyframes settle{0%{transform:scale(1.3);opacity:.4}60%{transform:scale(.94)}100%{transform:scale(1);opacity:1}}
-  .result .total.crit{color:var(--gold)} .result .total.fail{color:var(--blood)}
-  .result .break{font-family:var(--mono);font-size:.74rem;color:var(--ink);margin-top:.55rem;word-break:break-word}
+  .result .total.crit{color:var(--gold2);text-shadow:0 0 22px rgba(194,162,78,.7)}
+  .result .total.fail{color:var(--red);text-shadow:0 0 20px rgba(124,31,18,.5)}
+  .result .break{font-family:var(--mono);font-size:.74rem;color:var(--ink2);margin-top:.6rem;word-break:break-word}
   .result .break .drop{color:var(--dim);text-decoration:line-through}
-  .result .break.err{color:var(--blood)}
-  .result .crit-tag{color:var(--gold);font-weight:700;letter-spacing:.08em}
-  .result .fail-tag{color:var(--blood);font-weight:700;letter-spacing:.08em}
-  .result .glyph{position:absolute;top:50%;left:50%;width:120px;height:120px;transform:translate(-50%,-50%);
-    color:var(--arc);opacity:.08;pointer-events:none;animation:spin 26s linear infinite}
+  .result .break.err{color:var(--red)}
+  .result .crit-tag{font-family:var(--display);color:var(--gold);font-weight:700;letter-spacing:.08em}
+  .result .fail-tag{font-family:var(--display);color:var(--red);font-weight:700;letter-spacing:.08em}
+  .result .glyph{position:absolute;top:50%;left:50%;width:124px;height:124px;transform:translate(-50%,-50%);
+    color:var(--gold);opacity:.12;pointer-events:none;animation:spin 28s linear infinite}
   @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-  /* purely-visual crit/fumble motes */
   .mote{position:absolute;bottom:0;width:4px;height:4px;border-radius:50%;pointer-events:none}
-  .mote.ember{background:var(--gold);animation:rise var(--life) ease-out forwards}
-  .mote.ash{background:#5b6168;animation:fall var(--life) linear forwards;top:0;bottom:auto}
+  .mote.ember{background:var(--gold2);box-shadow:0 0 6px var(--gold2);animation:rise var(--life) ease-out forwards}
+  .mote.ash{background:#7a5a2a;animation:fall var(--life) linear forwards;top:0;bottom:auto}
   @keyframes rise{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-110px) scale(.2);opacity:0}}
   @keyframes fall{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(110px);opacity:0}}
 
   .quick{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
   .quick button{font-family:var(--mono);font-size:.66rem;padding:.4rem .6rem;cursor:pointer;border-radius:2px;
-    border:1.5px dashed var(--line);background:none;color:var(--dim);transition:all .15s}
-  .quick button:hover{border-color:var(--ember);color:var(--ember)}
-
-  .logbar{display:flex;justify-content:space-between;align-items:center;border-top:1.5px dashed var(--line);padding-top:.5rem}
-  .logbar span{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
-  .logbar button{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+    border:1px dashed var(--line);background:none;color:var(--ink2);transition:all .15s}
+  .quick button:hover{border-color:var(--red);color:var(--red)}
+  .logbar{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:.5rem}
+  .logbar span{font-family:var(--display);font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .logbar button{font-family:var(--display);font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
     background:none;border:none;cursor:pointer;text-decoration:underline}
-  .logbar button:hover{color:var(--blood)}
-  .log{font-family:var(--mono);font-size:.7rem;color:var(--dim);max-height:120px;overflow:auto;line-height:1.7;padding-top:.45rem}
-  .log b{color:var(--ink)}
+  .logbar button:hover{color:var(--red)}
+  .log{font-family:var(--mono);font-size:.7rem;color:var(--ink2);max-height:120px;overflow:auto;line-height:1.7;padding-top:.45rem}
+  .log b{color:var(--red);font-weight:700}
 
-  /* Oracle */
-  .oracle-btn{width:100%;font-family:var(--hand);font-weight:400;font-size:1.4rem;padding:.55rem;cursor:pointer;border-radius:2px;
-    border:1.5px solid var(--blood);color:var(--blood);background:var(--paper2);transition:all .18s;margin-bottom:.75rem}
-  .oracle-btn:hover{background:var(--blood);color:var(--card)}
+  /* ── oracle ── */
+  .oracle-btn{width:100%;font-family:var(--display);font-weight:700;font-size:.95rem;letter-spacing:.04em;padding:.95rem;cursor:pointer;border-radius:2px;
+    border:1px solid var(--red);color:#fdf6dd;background:linear-gradient(180deg,#9a2a1a,var(--red));transition:all .2s;margin-bottom:.85rem}
+  .oracle-btn:hover{box-shadow:0 0 22px rgba(124,31,18,.3)}
   .oracle-btn.asking{animation:pulse .9s ease-in-out infinite}
-  @keyframes pulse{0%,100%{box-shadow:0 0 0 rgba(168,50,28,0)}50%{box-shadow:0 0 0 4px rgba(168,50,28,.18)}}
-  .odds{width:100%;font-family:var(--mono);font-size:.74rem;background:var(--paper2);border:1.5px solid var(--ink);
-    color:var(--ink);padding:.55rem;margin-bottom:1rem;border-radius:2px}
-  .answer{text-align:center;font-family:var(--hand);font-size:2.1rem;font-weight:400;min-height:2rem;margin-bottom:.3rem;color:var(--ink)}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 rgba(124,31,18,0)}50%{box-shadow:0 0 0 5px rgba(124,31,18,.2)}}
+  .odds{width:100%;font-family:var(--display);font-size:.78rem;background:#f8eecb;border:1px solid var(--gold);color:var(--ink);padding:.55rem;margin-bottom:1rem;border-radius:2px}
+  .answer{text-align:center;font-family:var(--decor);font-weight:700;font-size:1.9rem;min-height:2rem;margin-bottom:.3rem;color:var(--ink)}
   .answer.reveal{animation:reveal .5s ease-out}
   @keyframes reveal{0%{opacity:0;letter-spacing:.3em;filter:blur(5px)}100%{opacity:1;letter-spacing:normal;filter:none}}
-  .answer.yes{color:var(--gold)}.answer.no{color:var(--blood)}.answer.maybe{color:var(--ember)}
-  .answer-sub{text-align:center;font-family:var(--mono);font-size:.7rem;color:var(--dim);margin-bottom:1.25rem;min-height:1rem}
+  .answer.yes{color:var(--green)}.answer.no{color:var(--red)}.answer.maybe{color:var(--gold)}
+  .answer-sub{text-align:center;font-family:var(--serif);font-style:italic;font-size:.82rem;color:var(--ink2);margin-bottom:1.25rem;min-height:1rem}
 
-  /* Loreweaver + Grimoire generators */
+  /* ── loreweaver + grimoire ── */
   .gen,.spellbtns{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
-  .gen button,.spellbtns button{font-family:var(--mono);font-size:.68rem;padding:.5rem .8rem;cursor:pointer;border-radius:2px;
-    border:1.5px solid var(--ink);background:var(--paper2);color:var(--ink);transition:all .14s}
-  .gen button:hover,.spellbtns button:hover{background:#fff;border-color:var(--arc);color:var(--arc);box-shadow:1px 2px 0 rgba(47,107,176,.25)}
-  .spellbtns button.surge:hover{border-color:var(--ember);color:var(--ember);box-shadow:1px 2px 0 rgba(194,97,31,.25)}
-  .lore,.grim{min-height:3rem;display:grid;gap:.45rem}
-  .lore.empty,.grim.empty{color:var(--dim);font-style:italic;align-content:center}
+  .gen button,.spellbtns button{font-family:var(--display);font-size:.66rem;font-weight:600;letter-spacing:.05em;padding:.5rem .8rem;cursor:pointer;border-radius:2px;
+    border:1px solid var(--gold);background:linear-gradient(180deg,#f6ecca,#ecdcae);color:var(--ink);transition:all .14s}
+  .gen button:hover,.spellbtns button:hover{border-color:var(--arc);color:var(--arc);box-shadow:0 3px 10px rgba(74,59,110,.2)}
+  .spellbtns button.surge:hover{border-color:var(--red);color:var(--red);box-shadow:0 3px 10px rgba(124,31,18,.2)}
+  .lore,.grim{min-height:3rem;display:grid;gap:.5rem}
+  .lore.empty,.grim.empty{color:var(--ink2);font-style:italic;align-content:center}
   .lore.loading,.grim.loading{color:var(--arc);font-style:italic;animation:pulse 1s ease-in-out infinite}
-  .lore-title,.grim-name{font-family:var(--hand);font-size:1.4rem;color:var(--arc);line-height:1.1}
+  .lore-title,.grim-name{font-family:var(--display);font-weight:700;font-size:1.1rem;letter-spacing:.02em;color:var(--arc);line-height:1.15}
   .grim .grim-name{color:var(--ink)}
   .lore-item{line-height:1.5;color:var(--ink)}
-  .lore-item .lbl,.grim-meta,.grim-src,.lore-src{font-family:var(--mono);font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+  .lore-item .lbl,.grim-meta,.grim-src,.lore-src{font-family:var(--display);font-size:.56rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
   .lore-item .lbl{display:block;margin-bottom:.05rem}
   .lore-src,.grim .grim-src{margin-top:.2rem}
-  .grim .grim-meta{color:var(--arc);font-size:.6rem}
+  .grim .grim-meta{color:var(--arc)}
   .grim .grim-body{line-height:1.5;color:var(--ink);max-height:11em;overflow:auto}
-  .grim .grim-cost{font-family:var(--mono);font-size:.66rem;color:var(--ember);border-left:2px solid var(--ember);padding-left:.6rem}
-
-  .well-toggle{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;
+  .grim .grim-cost{font-family:var(--serif);font-style:italic;font-size:.9rem;color:var(--red);border-left:2px solid var(--red);padding-left:.6rem}
+  .well-toggle{display:flex;align-items:center;gap:.5rem;font-family:var(--display);font-size:.58rem;font-weight:600;letter-spacing:.08em;
     text-transform:uppercase;color:var(--dim);cursor:pointer;margin-bottom:.9rem;user-select:none}
   .well-toggle input{accent-color:var(--arc);cursor:pointer;width:15px;height:15px}
-  .well-toggle .net{margin-left:auto;font-size:.55rem;letter-spacing:.08em}
+  .well-toggle .net{margin-left:auto;font-size:.55rem;letter-spacing:.06em}
   .well-toggle .net.on{color:var(--arc)} .well-toggle .net.off{color:var(--dim)}
 
+  /* ── tables ── */
   .tables{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem}
-  .tables button{font-family:var(--mono);font-size:.66rem;padding:.45rem .6rem;cursor:pointer;border-radius:2px;
-    border:1.5px solid var(--ink);background:var(--paper2);color:var(--ink);transition:all .14s;position:relative}
-  .tables button:hover{background:#fff;border-color:var(--gold);color:var(--gold)}
+  .tables button{font-family:var(--display);font-size:.64rem;font-weight:600;letter-spacing:.04em;padding:.45rem .6rem;cursor:pointer;border-radius:2px;
+    border:1px solid var(--gold);background:linear-gradient(180deg,#f6ecca,#ecdcae);color:var(--ink);transition:all .14s;position:relative}
+  .tables button:hover{border-color:var(--red);color:var(--red)}
   .tables button.custom{border-style:dashed}
   .tables button .kill{margin-left:.45rem;color:var(--dim);font-style:normal}
-  .tables button .kill:hover{color:var(--blood)}
-  .draw{min-height:2.4rem;font-size:1.02rem;line-height:1.6;color:var(--ink);border-left:3px solid var(--blood);padding:.5rem 0 .5rem .9rem}
-  .draw .src{display:block;font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.3rem}
+  .tables button .kill:hover{color:var(--red)}
+  .draw{min-height:2.4rem;border-left:3px solid var(--gold);padding:.4rem 0 .4rem .9rem}
+  .draw .src{display:block;font-family:var(--display);font-size:.56rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.3rem}
+  .draw .dtext{font-size:1.02rem;line-height:1.6;color:var(--ink)}
+  .draw .dtext::first-letter{font-family:var(--decor);font-weight:700;font-size:2.4em;line-height:.74;float:left;color:var(--red);padding:.06em .12em 0 0}
 
-  .forge-toggle{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  .forge-toggle{font-family:var(--display);font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
     background:none;border:none;cursor:pointer;margin-top:.9rem;padding:0}
-  .forge-toggle:hover{color:var(--gold)}
+  .forge-toggle:hover{color:var(--red)}
   .forge{display:none;flex-direction:column;gap:.5rem;margin-top:.7rem}
   .forge.open{display:flex}
-  .forge input,.forge textarea{font-family:var(--mono);font-size:.74rem;background:var(--paper2);border:1.5px solid var(--ink);
-    color:var(--ink);padding:.5rem;border-radius:2px}
-  .forge input:focus,.forge textarea:focus{outline:none;border-color:var(--gold);background:#fff}
+  .forge input,.forge textarea{font-family:var(--mono);font-size:.74rem;background:#f8eecb;border:1px solid var(--gold);color:var(--ink);padding:.5rem;border-radius:2px}
+  .forge input:focus,.forge textarea:focus{outline:none;border-color:var(--red);background:#fdf6dd}
   .forge textarea{min-height:74px;resize:vertical;line-height:1.5}
-  .forge .forge-go{font-family:var(--hand);font-size:1.1rem;padding:.25rem;cursor:pointer;border-radius:2px;
-    border:1.5px solid var(--gold);color:var(--gold);background:var(--paper2);transition:all .18s}
-  .forge .forge-go:hover{background:var(--gold);color:var(--card)}
+  .forge .forge-go{font-family:var(--display);font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;padding:.5rem;cursor:pointer;border-radius:2px;
+    border:1px solid var(--gold);color:#2a1d08;background:linear-gradient(180deg,var(--gold2),var(--gold));transition:all .18s}
+  .forge .forge-go:hover{box-shadow:0 0 14px rgba(154,122,47,.35)}
 
-  footer{text-align:center;margin-top:2rem;color:var(--dim);font-family:var(--mono);font-size:.66rem}
-  footer a{color:var(--blood);text-decoration:none}
+  footer{text-align:center;margin-top:2rem;color:var(--dim);font-family:var(--display);font-size:.64rem;letter-spacing:.06em}
+  footer a{color:var(--red);text-decoration:none}
+
+  /* ── mode visibility ── */
+  body.mode-player [data-mode="gm"]{display:none}
 
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation:none!important;transition:none!important}
   }
 </style>
 </head>
-<body>
+<body class="mode-gm">
 <div class="wrap">
   <header>
+    <div class="modes">
+      <button class="modebtn" data-mode="player">Player</button>
+      <button class="modebtn" data-mode="gm">Game Master</button>
+    </div>
     <svg class="d20mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
       <path d="M32 3 59 18.5 59 45.5 32 61 5 45.5 5 18.5Z"/>
       <path d="M32 19 44 27 44 37 32 45 20 37 20 27Z"/>
@@ -201,11 +211,11 @@
       <path d="M32 19 32 45 M44 27 20 37 M44 37 20 27"/>
     </svg>
     <p class="eyebrow">Dungeon Dice</p>
-    <h1>Cast the Bones, Heed the Dark</h1>
+    <h1><span class="orn">✦</span>Cast the Bones, Heed the Dark<span class="orn">✦</span></h1>
   </header>
 
-  <div class="grid">
-    <!-- DICE -->
+  <div class="deck">
+    <!-- DICE (both modes) -->
     <section class="card">
       <h2>The Bone Tray</h2>
       <div class="cast-row">
@@ -247,7 +257,25 @@
       <div class="log" id="log"></div>
     </section>
 
-    <!-- ORACLE -->
+    <!-- GRIMOIRE (both modes) -->
+    <section class="card arcane">
+      <h2>The Grimoire</h2>
+      <label class="well-toggle">
+        <input type="checkbox" id="wellToggle">
+        Draw from the deeper well
+        <span class="net off" id="netState">live SRD · off</span>
+      </label>
+      <div class="spellbtns">
+        <button id="spellBtn">Turn a page</button>
+        <button id="relicBtn">Pull a relic</button>
+        <button id="surgeBtn" class="surge">Wild magic surges!</button>
+      </div>
+      <div class="grim empty" id="grim">A spell, a relic, or a surge of raw chaos — turn a page and see what answers.</div>
+    </section>
+  </div>
+
+  <div class="deck" data-mode="gm">
+    <!-- ORACLE (GM) -->
     <section class="card">
       <h2>The Black Oracle</h2>
       <select class="odds" id="odds">
@@ -263,7 +291,7 @@
 
       <h2 style="margin-top:.5rem">Omens &amp; Auguries</h2>
       <div class="tables" id="tables"></div>
-      <div class="draw" id="draw"><span class="src">the lots lie still</span>Choose an augury above.</div>
+      <div class="draw" id="draw"><span class="src">the lots lie still</span><p class="dtext">Choose an augury above.</p></div>
       <button class="forge-toggle" id="forgeToggle">＋ forge your own table</button>
       <div class="forge" id="forge">
         <input type="text" id="forgeName" placeholder="table name — e.g. Weather" autocomplete="off">
@@ -271,30 +299,12 @@
         <button class="forge-go" id="forgeGo">Forge table</button>
       </div>
     </section>
-  </div>
 
-  <div class="grid">
-    <!-- LOREWEAVER -->
+    <!-- LOREWEAVER (GM) -->
     <section class="card">
       <h2>The Loreweaver</h2>
       <div class="gen" id="gen"></div>
       <div class="lore empty" id="lore">Summon an NPC, a haunt, a town, a faction, a dungeon, a stretch of wilderness, or a beast — a seed to grow at the table.</div>
-    </section>
-
-    <!-- GRIMOIRE -->
-    <section class="card arcane">
-      <h2>The Grimoire</h2>
-      <label class="well-toggle">
-        <input type="checkbox" id="wellToggle">
-        Draw from the deeper well
-        <span class="net off" id="netState">live SRD · off</span>
-      </label>
-      <div class="spellbtns">
-        <button id="spellBtn">Turn a page</button>
-        <button id="relicBtn">Pull a relic</button>
-        <button id="surgeBtn" class="surge">Wild magic surges!</button>
-      </div>
-      <div class="grim empty" id="grim">A spell, a relic, or a surge of raw chaos — turn a page and see what answers.</div>
     </section>
   </div>
 
@@ -464,6 +474,17 @@ document.addEventListener('keydown',e=>{
   if(e.key==='r'||e.key==='R'){ $('notation').value=lastExpr; doRoll(lastExpr); }
 });
 
+/* ─── player / gm mode ─── */
+let mode='gm'; try{ mode=localStorage.getItem('dd.mode')||'gm'; }catch(e){}
+function setMode(m){
+  mode=m;
+  document.body.classList.toggle('mode-player',m==='player');
+  document.body.classList.toggle('mode-gm',m!=='player');
+  document.querySelectorAll('.modebtn').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  try{ localStorage.setItem('dd.mode',m); }catch(e){}
+}
+document.querySelector('.modes').onclick=e=>{ const b=e.target.closest('.modebtn'); if(b) setMode(b.dataset.mode); };
+
 /* ════════════════════════════════════════════════════════════════
    THE ORACLE — odds dropdown and the d20 are one mechanism.
    Higher roll = "yes"; the odds shift the threshold. The "and / but"
@@ -588,7 +609,7 @@ $('tables').onclick=e=>{
     localStorage.setItem('doracle.tables',JSON.stringify(custom)); renderTables(); return; }
   const b=e.target.closest('button'); if(!b) return;
   const name=b.dataset.t;
-  $('draw').innerHTML=`<span class="src">${name}</span>${pick(allTables()[name])}`;
+  $('draw').innerHTML=`<span class="src">${name}</span><p class="dtext">${pick(allTables()[name])}</p>`;
 };
 $('forgeToggle').onclick=()=>$('forge').classList.toggle('open');
 $('forgeGo').onclick=()=>{
@@ -786,6 +807,7 @@ const D={
 D.tables["Adventure site"]=D.adventureSite;   // default areas for inspiration
 renderTables();
 loadLog();
+setMode(mode);
 setNet();
 if(well) primeWell();
 </script>
